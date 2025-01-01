@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Linking, Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { Redirect, router } from 'expo-router';
 import ObscuraButton from '@/components/ObscuraButton';
+import { BlurView } from 'expo-blur';
 
 const HomeScreen = () => {
   const { hasPermission: hasCameraPermission } = useCameraPermission();
@@ -37,6 +38,11 @@ const HomeScreen = () => {
     </ThemedView>
   );
 
+  useEffect(() => {
+    if (!device.hasTorch) setTorch("off");
+    if (!device.hasFlash) setFlash("off");
+  }, [device]);
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -54,8 +60,29 @@ const HomeScreen = () => {
             zoom={zoom}
             resizeMode='cover'
             exposure={exposure}
-            torch={torch}
+            torch={device.hasTorch ? torch : "off"}
           />
+          <BlurView
+            intensity={100}
+            tint='dark'
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              padding: 10,
+              width: '50%'
+            }}
+            experimentalBlurMethod='dimezisBlurView'
+          >
+            <ThemedText
+              style={{
+                color: 'white',
+                textAlign: 'center'
+              }}
+            >
+              Exposure: {exposure} | Zoom: x{zoom}
+            </ThemedText>
+          </BlurView>
         </View>
 
         <View style={{
@@ -94,6 +121,7 @@ const HomeScreen = () => {
               containerStyle={{
                 alignSelf: 'center',
               }}
+              disabled={!device.hasTorch}
             />
             <ObscuraButton
               iconName={
@@ -106,6 +134,7 @@ const HomeScreen = () => {
               containerStyle={{
                 alignSelf: 'center',
               }}
+              disabled={!device.hasFlash}
             />
             <ObscuraButton
               iconName='camera-reverse-outline'
@@ -121,7 +150,7 @@ const HomeScreen = () => {
               onPress={() => {
                 const link = Platform.select({
                   ios: 'photos-redirect://',
-                  android: 'content://media/external/images/media',
+                  android: 'content://media/internal/images/media',
                 });
                 if (link) Linking.openURL(link);
               }}

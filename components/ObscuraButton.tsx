@@ -15,6 +15,7 @@ interface ObscuraButtonProps {
   iconName?: ComponentProps<typeof Ionicons>["name"];
   containerStyle?: StyleProp<ViewStyle>;
   iconSize?: number;
+  disabled?: boolean;
 }
 export default function ObscuraButton({
   onPress,
@@ -22,6 +23,7 @@ export default function ObscuraButton({
   title,
   containerStyle,
   iconSize,
+  disabled
 }: ObscuraButtonProps) {
   return (
     <TouchableOpacity
@@ -29,15 +31,17 @@ export default function ObscuraButton({
       style={[
         styles.container,
         {
-          backgroundColor: Colors.dark.background,
+          backgroundColor: disabled ? 'gray' : Colors.dark.background,
           borderRadius: title ? 6 : 40,
           alignSelf: "flex-start",
+          opacity: disabled ? 0.5 : 1,
         },
         containerStyle,
       ]}
+      disabled={disabled}
     >
       {iconName && (
-        <Ionicons name={iconName} size={iconSize ?? 28} color={"white"} />
+        <Ionicons name={iconName} size={iconSize ?? 28} color={"white"} disabled={disabled} />
       )}
       {title ? (
         <Text
@@ -46,6 +50,7 @@ export default function ObscuraButton({
             fontWeight: "600",
             color: "white",
           }}
+          disabled={disabled}
         >
           {title}
         </Text>
