@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Linking, Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Platform, SafeAreaView, StatusBar, StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { Redirect, router } from 'expo-router';
 import ObscuraButton from '@/components/ObscuraButton';
 import { BlurView } from 'expo-blur';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen = () => {
   const { hasPermission: hasCameraPermission } = useCameraPermission();
@@ -18,6 +19,7 @@ const HomeScreen = () => {
   const device = useCameraDevice(cameraPosition);
   const [zoom, setZoom] = useState(device?.neutralZoom);
   const [exposure, setExposure] = useState(0);
+  const camera = useRef<Camera>(null);
 
   if (redirectToPermissions) return (
     <Redirect href={'/permissions'} />
@@ -43,6 +45,33 @@ const HomeScreen = () => {
     if (!device.hasFlash) setFlash("off");
   }, [device]);
 
+  const takePicture = async () => {
+    try {
+      if (camera.current === null) {
+        throw new Error('Camera ref is null');
+      }
+
+      console.log('Taking a picture...');
+
+      const photo = await camera.current.takePhoto({
+        flash: device.hasFlash ? flash : "off",
+        enableShutterSound: false,
+      });
+
+      router.push({
+        pathname: '/media',
+        params: {
+          media: photo.path,
+          type: 'photo'
+        }
+      });
+    }
+    catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'An error occurred while taking the picture.');
+    }
+  };
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -52,6 +81,7 @@ const HomeScreen = () => {
           overflow: 'hidden',
         }}>
           <Camera
+            ref={camera}
             style={{
               flex: 1,
             }}
@@ -165,6 +195,23 @@ const HomeScreen = () => {
                 alignSelf: 'center',
               }}
             />
+          </View>
+
+          <View style={{
+            flex: 1.1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+          }}>
+            <TouchableHighlight
+              onPress={takePicture}
+            >
+              <FontAwesome5
+                name='dot-circle'
+                size={55}
+                color={"white"}
+              />
+            </TouchableHighlight>
           </View>
         </View>
       </SafeAreaView>
