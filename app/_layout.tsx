@@ -36,6 +36,7 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="media" options={{ headerTitle: 'Preview', animation: 'slide_from_bottom' }} />
           <Stack.Screen name="permissions" options={{ headerTitle: "Permissions" }} />
           <Stack.Screen name="+not-found" />
         </Stack>

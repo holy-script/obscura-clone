@@ -9,11 +9,13 @@ import { BlurView } from 'expo-blur';
 import { FontAwesome5 } from '@expo/vector-icons';
 import ZoomControls from '@/components/ZoomControls';
 import ExposureControls from '@/components/ExposureControls';
+import { useIsFocused } from '@react-navigation/native';
 
 const HomeScreen = () => {
   const { hasPermission: hasCameraPermission } = useCameraPermission();
   const { hasPermission: hasMicrophonePermission } = useMicrophonePermission();
   const redirectToPermissions = !hasCameraPermission || !hasMicrophonePermission;
+  const isActive = useIsFocused();
 
   const [flash, setFlash] = useState<"off" | "on">("off");
   const [torch, setTorch] = useState<"off" | "on">("off");
@@ -90,11 +92,12 @@ const HomeScreen = () => {
               flex: 1,
             }}
             device={device}
-            isActive
+            isActive={isActive}
             zoom={zoom}
             resizeMode='cover'
             exposure={exposure}
             torch={device.hasTorch ? torch : "off"}
+            photo
           />
           <BlurView
             intensity={100}
