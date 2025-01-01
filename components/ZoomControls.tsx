@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import React from 'react';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import Animated, { BounceIn } from 'react-native-reanimated';
@@ -91,5 +91,3 @@ const ZoomControls = (
 };
 
 export default ZoomControls;
-
-const styles = StyleSheet.create({});
