@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { Linking, Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { Redirect, router } from 'expo-router';
+import ObscuraButton from '@/components/ObscuraButton';
 
 const HomeScreen = () => {
   const { hasPermission: hasCameraPermission } = useCameraPermission();
   const { hasPermission: hasMicrophonePermission } = useMicrophonePermission();
   const redirectToPermissions = !hasCameraPermission || !hasMicrophonePermission;
-  const device = useCameraDevice('back');
+
+  const [flash, setFlash] = useState<"off" | "on">("off");
+  const [torch, setTorch] = useState<"off" | "on">("off");
+  const [cameraPosition, setCameraPosition] = useState<"front" | "back">("back");
+  const device = useCameraDevice(cameraPosition);
+  const [zoom, setZoom] = useState(device?.neutralZoom);
+  const [exposure, setExposure] = useState(0);
 
   if (redirectToPermissions) return (
     <Redirect href={'/permissions'} />
@@ -44,6 +51,10 @@ const HomeScreen = () => {
             }}
             device={device}
             isActive
+            zoom={zoom}
+            resizeMode='cover'
+            exposure={exposure}
+            torch={torch}
           />
         </View>
 
@@ -69,7 +80,62 @@ const HomeScreen = () => {
 
           <View style={{
             flex: 0.7,
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',
           }}>
+            <ObscuraButton
+              iconName={
+                torch === "on" ?
+                  "flashlight" : "flashlight-outline"
+              }
+              onPress={() => {
+                setTorch(t => (t === "on" ? "off" : "on"));
+              }}
+              containerStyle={{
+                alignSelf: 'center',
+              }}
+            />
+            <ObscuraButton
+              iconName={
+                flash === "on" ?
+                  "flash-outline" : "flash-off-outline"
+              }
+              onPress={() => {
+                setFlash(f => (f === "on" ? "off" : "on"));
+              }}
+              containerStyle={{
+                alignSelf: 'center',
+              }}
+            />
+            <ObscuraButton
+              iconName='camera-reverse-outline'
+              onPress={() => {
+                setCameraPosition(p => (p === "back" ? "front" : "back"));
+              }}
+              containerStyle={{
+                alignSelf: 'center',
+              }}
+            />
+            <ObscuraButton
+              iconName='image-outline'
+              onPress={() => {
+                const link = Platform.select({
+                  ios: 'photos-redirect://',
+                  android: 'content://media/external/images/media',
+                });
+                if (link) Linking.openURL(link);
+              }}
+              containerStyle={{
+                alignSelf: 'center',
+              }}
+            />
+            <ObscuraButton
+              iconName='settings-outline'
+              onPress={() => router.push('/_sitemap')}
+              containerStyle={{
+                alignSelf: 'center',
+              }}
+            />
           </View>
         </View>
       </SafeAreaView>
