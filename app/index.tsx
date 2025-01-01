@@ -7,6 +7,7 @@ import { Redirect, router } from 'expo-router';
 import ObscuraButton from '@/components/ObscuraButton';
 import { BlurView } from 'expo-blur';
 import { FontAwesome5 } from '@expo/vector-icons';
+import ZoomControls from '@/components/ZoomControls';
 
 const HomeScreen = () => {
   const { hasPermission: hasCameraPermission } = useCameraPermission();
@@ -19,6 +20,8 @@ const HomeScreen = () => {
   const device = useCameraDevice(cameraPosition);
   const [zoom, setZoom] = useState(device?.neutralZoom);
   const [exposure, setExposure] = useState(0);
+  const [showZoomControls, setShowZoomControls] = useState(false);
+  const [showExposureControls, setShowExposureControls] = useState(false);
   const camera = useRef<Camera>(null);
 
   if (redirectToPermissions) return (
@@ -115,105 +118,133 @@ const HomeScreen = () => {
           </BlurView>
         </View>
 
-        <View style={{
-          flex: 1,
-        }}>
+        {showZoomControls ? (
           <View style={{
-            flex: 0.7,
+            flex: 1,
           }}>
-            <ThemedText>
-              Max FPS: {device.formats[0].maxFps}
-            </ThemedText>
-            <ThemedText>
-              Width: {device.formats[0].photoWidth}
-            </ThemedText>
-            <ThemedText>
-              Height: {device.formats[0].photoHeight}
-            </ThemedText>
-            <ThemedText>
-              Camera: {device.name}
-            </ThemedText>
-          </View>
-
-          <View style={{
-            flex: 0.7,
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',
-          }}>
-            <ObscuraButton
-              iconName={
-                torch === "on" ?
-                  "flashlight" : "flashlight-outline"
-              }
-              onPress={() => {
-                setTorch(t => (t === "on" ? "off" : "on"));
-              }}
-              containerStyle={{
-                alignSelf: 'center',
-              }}
-              disabled={!device.hasTorch}
-            />
-            <ObscuraButton
-              iconName={
-                flash === "on" ?
-                  "flash-outline" : "flash-off-outline"
-              }
-              onPress={() => {
-                setFlash(f => (f === "on" ? "off" : "on"));
-              }}
-              containerStyle={{
-                alignSelf: 'center',
-              }}
-              disabled={!device.hasFlash}
-            />
-            <ObscuraButton
-              iconName='camera-reverse-outline'
-              onPress={() => {
-                setCameraPosition(p => (p === "back" ? "front" : "back"));
-              }}
-              containerStyle={{
-                alignSelf: 'center',
-              }}
-            />
-            <ObscuraButton
-              iconName='image-outline'
-              onPress={() => {
-                const link = Platform.select({
-                  ios: 'photos-redirect://',
-                  android: 'content://media/internal/images/media',
-                });
-                if (link) Linking.openURL(link);
-              }}
-              containerStyle={{
-                alignSelf: 'center',
-              }}
-            />
-            <ObscuraButton
-              iconName='settings-outline'
-              onPress={() => router.push('/_sitemap')}
-              containerStyle={{
-                alignSelf: 'center',
-              }}
+            <ZoomControls
+              setZoom={setZoom}
+              setShowZoomControls={setShowZoomControls}
+              zoom={zoom ?? 1}
             />
           </View>
-
+        ) : (
           <View style={{
-            flex: 1.1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
+            flex: 1,
           }}>
-            <TouchableHighlight
-              onPress={takePicture}
-            >
-              <FontAwesome5
-                name='dot-circle'
-                size={55}
-                color={"white"}
+            <View style={{
+              flex: 0.7,
+            }}>
+              <ThemedText>
+                Max FPS: {device.formats[0].maxFps}
+              </ThemedText>
+              <ThemedText>
+                Width: {device.formats[0].photoWidth}
+                {' '}
+                Height: {device.formats[0].photoHeight}
+              </ThemedText>
+              <ThemedText>
+                Camera: {device.name}
+              </ThemedText>
+            </View>
+
+            <View style={{
+              flex: 0.7,
+              flexDirection: 'row',
+              justifyContent: 'space-evenly',
+            }}>
+              <ObscuraButton
+                iconName={
+                  torch === "on" ?
+                    "flashlight" : "flashlight-outline"
+                }
+                onPress={() => {
+                  setTorch(t => (t === "on" ? "off" : "on"));
+                }}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+                disabled={!device.hasTorch}
               />
-            </TouchableHighlight>
+              <ObscuraButton
+                iconName={
+                  flash === "on" ?
+                    "flash-outline" : "flash-off-outline"
+                }
+                onPress={() => {
+                  setFlash(f => (f === "on" ? "off" : "on"));
+                }}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+                disabled={!device.hasFlash}
+              />
+              <ObscuraButton
+                iconName='camera-reverse-outline'
+                onPress={() => {
+                  setCameraPosition(p => (p === "back" ? "front" : "back"));
+                }}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+              />
+              <ObscuraButton
+                iconName='image-outline'
+                onPress={() => {
+                  const link = Platform.select({
+                    ios: 'photos-redirect://',
+                    android: 'content://media/internal/images/media',
+                  });
+                  if (link) Linking.openURL(link);
+                }}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+              />
+              <ObscuraButton
+                iconName='settings-outline'
+                onPress={() => router.push('/_sitemap')}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+              />
+            </View>
+
+            <View style={{
+              flex: 1.1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-evenly',
+            }}>
+              <ObscuraButton
+                iconSize={40}
+                title='+/-'
+                onPress={() => setShowExposureControls(s => !s)}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+              />
+              <TouchableHighlight
+                onPress={takePicture}
+              >
+                <FontAwesome5
+                  name='dot-circle'
+                  size={55}
+                  color={"white"}
+                />
+              </TouchableHighlight>
+              <ObscuraButton
+                iconSize={40}
+                title='1x'
+                onPress={() => setShowZoomControls(s => !s)}
+                containerStyle={{
+                  alignSelf: 'center',
+                }}
+              />
+            </View>
           </View>
-        </View>
+        )}
+
       </SafeAreaView>
     </>
   );

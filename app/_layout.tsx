@@ -5,11 +5,15 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
+import * as NavigationBar from 'expo-navigation-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+NavigationBar.setVisibilityAsync('hidden');
+NavigationBar.setBehaviorAsync('overlay-swipe');
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -28,13 +32,15 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="permissions" options={{ headerTitle: "Permissions" }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <GestureHandlerRootView>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="permissions" options={{ headerTitle: "Permissions" }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
